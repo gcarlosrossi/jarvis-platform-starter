@@ -1,0 +1,143 @@
+openapi: 3.0.3
+
+info:
+  title: {{Domain}} Service API
+  version: 1.0.0
+  description: API for managing {{domainPlural}}
+
+servers:
+  - url: http://localhost:3000
+
+tags:
+  - name: {{Domain}}
+    description: Operations for {{domainPlural}}
+
+paths:
+
+  /{{domainPlural}}:
+
+    get:
+      tags:
+        - {{Domain}}
+      summary: Get all {{domainPlural}}
+      operationId: get{{DomainPlural}}
+      responses:
+        "200":
+          description: Successful response
+        "500":
+          description: Internal server error
+
+    post:
+      tags:
+        - {{Domain}}
+      summary: Create a new {{domain}}
+      operationId: create{{Domain}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/{{Domain}}"
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad request
+        "409":
+          description: Conflict
+        "500":
+          description: Internal server error
+
+  /{{domainPlural}}/{id}:
+
+    get:
+      tags:
+        - {{Domain}}
+      summary: Get {{domain}} by id
+      operationId: get{{Domain}}ById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+        "404":
+          description: Not found
+        "500":
+          description: Internal server error
+
+    put:
+      tags:
+        - {{Domain}}
+      summary: Update {{domain}}
+      operationId: update{{Domain}}
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated
+        "400":
+          description: Bad request
+        "404":
+          description: Not found
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - {{Domain}}
+      summary: Delete {{domain}}
+      operationId: delete{{Domain}}
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+        "500":
+          description: Internal server error
+
+components:
+
+  schemas:
+
+    {{Domain}}:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "123"
+
+        name:
+          type: string
+          example: "Example {{Domain}}"
+
+        createdAt:
+          type: string
+          format: date-time
+
+  responses:
+
+    BadRequest:
+      description: Invalid request
+
+    NotFound:
+      description: Resource not found
+
+    Conflict:
+      description: Resource conflict
+
+    InternalError:
+      description: Internal server error

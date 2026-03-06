@@ -1,0 +1,11 @@
+
+{
+  "name": "jarvis-platform-starter",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["jarvis-cli"],
+  "scripts": {
+    "build": "echo build step placeholder",
+    "start": "echo use jarvis-cli to create a project"
+  }
+}
