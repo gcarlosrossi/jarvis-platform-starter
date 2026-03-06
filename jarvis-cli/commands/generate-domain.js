@@ -1,5 +1,7 @@
 /**
  * generate-domain.js
+ * Author: Gregorovichz Carlos Rossi
+ * Fecha Creación: 05-03-2026
  * ----------------------------------------------------
  * Genera un nuevo dominio API basado en un template OpenAPI.
  *
