@@ -1,6 +1,7 @@
 /**
  * generate-backend.js
  * Author: Gregorovichz Carlos Rossi
+ * Fecha Creación: 05-03-2026
  * ----------------------------------------------------
  * Genera microservicios NestJS con arquitectura hexagonal
  * leyendo los dominios definidos en api/domains

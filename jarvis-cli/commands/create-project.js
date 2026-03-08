@@ -22,7 +22,11 @@ const { default: inquirer } = require("inquirer");
 const {
   PREFIXES,
   PROJECT_FOLDERS,
-  TEMPLATES
+  TEMPLATES,
+  CREATE_PROJECT_MESSAGES,
+  PROMPT_TYPE,
+  PROMPT_NAME,
+  RETURN
 } = require("../utils/constants");
 
 /**
@@ -51,29 +55,26 @@ async function askProjectInfo() {
 
   return inquirer.prompt([
     {
-      type: "list",
-      name: "prefix",
-      message: "Seleccione el tipo de microservicio:",
+      type: PROMPT_TYPE.LIST,
+      name: PROMPT_NAME.PREFIX,
+      message: CREATE_PROJECT_MESSAGES.TIPOPROYECTO,
       choices: Object.values(PREFIXES).map((prefix) => ({
         name: prefix.name,
         value: prefix.prefix
       }))
     },
     {
-      type: "input",
-      name: "name",
-      message: "Ingrese el nombre del proyecto:",
+      type: PROMPT_TYPE.INPUT,
+      name: PROMPT_NAME.NAME,
+      message: CREATE_PROJECT_MESSAGES.NOMBREPROYECTO,
       validate: (input) => {
-
         if (!input.trim()) {
-          return "Debe ingresar un nombre";
+          return CREATE_PROJECT_MESSAGES.NOMBREPROYECTO_REQUIRED;
         }
-
         if (input.trim().length < 3) {
-          return "El nombre debe tener al menos 3 caracteres";
+          return CREATE_PROJECT_MESSAGES.NOMBREPROYECTO_LONGITUDMINIMA;
         }
-
-        return true;
+        return RETURN.SUCCESS;
       }
     }
   ]);
@@ -84,21 +85,17 @@ async function askProjectInfo() {
  * Crea la estructura base del proyecto
  */
 function createProjectStructure(projectPath) {
-
   ensureDir(projectPath);
-
   PROJECT_FOLDERS.forEach(folder => {
     ensureDir(path.join(projectPath, folder));
   });
-
-  console.log("📁 Estructura base creada");
+  console.log(CREATE_PROJECT_MESSAGES.INFO_ESTRUCTURA_CREADA);
 }
 
 /**
  * Copia el template OpenAPI root al nuevo proyecto.
  */
 function copyOpenApiTemplate(projectPath) {
-
   const templatePath = path.join(
     __dirname,
     "..",
@@ -106,21 +103,17 @@ function copyOpenApiTemplate(projectPath) {
     "openapi",
     TEMPLATES.OPENAPI
   );
-
   if (!fs.existsSync(templatePath)) {
-    console.warn("⚠ No se encontró el template openapi.yaml");
+    console.warn(CREATE_PROJECT_MESSAGES.WARN_TEMPLATE_NOTFOUND);
     return;
   }
-
   const destinationPath = path.join(
     projectPath,
     "api",
     TEMPLATES.OPENAPI
   );
-
   fs.copyFileSync(templatePath, destinationPath);
-
-  console.log("📄 Template OpenAPI copiado");
+  console.log(CREATE_PROJECT_MESSAGES.INFO_TEMPLATE_COPIADO);
 }
 
 /**
@@ -128,20 +121,14 @@ function copyOpenApiTemplate(projectPath) {
  */
 async function createProject() {
 
-  console.log("\n🚀 Jarvis CLI - Crear Proyecto\n");
+  console.log(CREATE_PROJECT_MESSAGES.INFO_PROJECT_INIT);
 
   try {
-
     const answers = await askProjectInfo();
-
     const normalizedName = normalizeProjectName(answers.name);
-
     const projectName = `${answers.prefix}-${normalizedName}`;
-
     const rootPath = process.cwd();
-
     const projectPath = path.join(rootPath, projectName);
-
     console.log(`📦 Nombre del proyecto: ${projectName}\n`);
 
     if (fs.existsSync(projectPath)) {
@@ -158,30 +145,62 @@ async function createProject() {
      */
     copyOpenApiTemplate(projectPath);
 
-    console.log("\n✅ Proyecto creado correctamente\n");
+    /**
+     * Copia template project files
+     */
+    copyProjectTemplates(projectPath)
 
-    console.log("📂 Estructura generada:\n");
-
+    console.log(CREATE_PROJECT_MESSAGES.INFO_PROJECT_CREADA);
+    console.log(CREATE_PROJECT_MESSAGES.INFO_ESTRUCTURA_GENERADA);
     console.log(`
-${projectName}
- ├ src
- └ api
-    ├ openapi.yaml
-    └ domains
-`);
+      ${projectName}
+      ├ src
+      └ api
+          ├ openapi.yaml
+          └ domains
+    `);
 
-    console.log("Siguientes pasos:\n");
-
-    console.log(`  cd ${projectName}`);
-    console.log("  jarvis generate-domain <domain>");
-    console.log("  jarvis generate-backend\n");
-
+    console.log(CREATE_PROJECT_MESSAGES.INFO_SIGUIENTES_PASOS);
+    console.log(`>_   cd ${projectName}`);
+    console.log(`>_   jarvis generate-domain ${normalizedName}`);
+    console.log(">_   jarvis generate-backend\n");
   } catch (error) {
 
-    console.error("\n❌ Error creando el proyecto\n");
+    console.error(CREATE_PROJECT_MESSAGES.ERROR_PROJECT_CREADA);
     console.error(error.message);
 
   }
+
+}
+
+function copyProjectTemplates(projectPath) {
+
+  const templatesDir = path.join(
+    __dirname,
+    "..",
+    "templates",
+    "project"
+  )
+
+  const files = [
+    { src: "gitignore", dest: ".gitignore" },
+    { src: "package.json", dest: "package.json" },
+    { src: "docker-compose.yml", dest: "docker-compose.yml" },
+    { src: "README.md", dest: "README.md" }
+  ]
+
+  files.forEach(file => {
+
+    const src = path.join(templatesDir, file.src)
+    const dest = path.join(projectPath, file.dest)
+
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, dest)
+    }
+
+  })
+
+  console.log("📦 Archivos base del proyecto creados")
 
 }
 
